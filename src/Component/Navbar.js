@@ -1,40 +1,48 @@
-import React, { useContext, useState } from "react"
-import { Link, useHistory } from "react-router-dom"
-import Logo from "../assets/img/logo.png"
-import { MobileAppContext } from "../Context/MobileAppContext"
+import Cookies from 'js-cookie'
+import '../aset/Navbar.css'
+import Logo from '../aset/Logo.png'
+import React, { useContext } from 'react'
+import {Link, useHistory} from 'react-router-dom'
+import { UserContext } from '../FinalContext/UserContext'
 
-const Navbar = () => {
-    let history = useHistory()
-    const {searchStatus, setSearchStatus} = useContext(MobileAppContext)
-    const [search, setSearch] = useState("")
 
-    const handleChange = (e) => {
-        setSearch(e.target.value)
+const Navbar = () => { 
+    const history = useHistory()
+    const {loginStatus, setLoginStatus} = useContext(UserContext)
+    
+    const handleLogout = () =>{
+        setLoginStatus(false)
+        Cookies.remove('token')
+        Cookies.remove('name')
+        Cookies.remove('email')
+        history.push('/login')
+        console.log("logout")
     }
-
-    const handleSearch = (e) => {
-        e.preventDefault()
-        setSearchStatus(true)
-        setSearch("")
-        history.push(`/search/${search}`)
-    }
-
     return (
-        <>
-            <div className="topnav">
-                <Link to="/">
-                    <img src={Logo} width="70" />
-                </Link>
-                <Link to="/">Home</Link>
-                <Link to="/mobile-list">Mobile List</Link>
-                <Link to="/about">About</Link>
-                <form method="POST" onSubmit={handleSearch}>
-                    <input type="text" onChange={handleChange} value={search}/>
-                    <input type="submit" value="Cari" />
-                </form>
-            </div>
-        </>
+        <div className="Nav">
+            <Link to='/'><img src={Logo} style={{float:"left", marginLeft:"200px"}}/></Link>
+            <ul className='list'> 
+                <li><Link to='/'>Home</Link></li>
+                <li><Link to='/movie'>Movie</Link></li>
+                <li><Link to='/game'>Game</Link></li>
+                <li><Link to='/about'>About</Link></li>
+                <div className='auth' style={{float:"right"}}>
+                {
+                    Cookies.get('token') !== undefined && <li onClick={handleLogout} style={{cursor:"pointer"}}><span style={{float:"right"}}>Logout</span></li>
+                }
+                {
+                    Cookies.get('token') === undefined  && (
+                        <>
+                         <li><Link to='/register'>Register</Link></li>
+                    <li><Link to='/login'>Login</Link></li>
+                        </>
+                   
+                    )
+                }
+                </div>
+            </ul>
+           
+        </div>
     )
 }
-
 export default Navbar

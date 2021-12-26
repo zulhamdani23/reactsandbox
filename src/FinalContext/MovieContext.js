@@ -1,10 +1,16 @@
 import axios from 'axios'
 import React, { createContext, useState } from 'react'
+import { useHistory } from "react-router"
+import Cookies from 'js-cookie'
 
 export const MovieContext = createContext()
 
 export const MovieProvider = props => {
+    const history = useHistory()
+    const [fetchStatus, setFetchStatus] = useState(true)
     const [movieList, setMovieList] = useState([])
+    const [ searchData , setSearchData ] = useState([])
+    const [movieId, setMovieId] = useState(-1)
     const [inputMovie, setInputMovie] = useState({
         title:'',
         description:'',
@@ -15,8 +21,7 @@ export const MovieProvider = props => {
         year:'',
         review: '' 
     })
-    const [movieId, setMovieId] = useState(-1)
-
+    
     const fetchMovie = async () => {
         let daftarMovie = await axios.get(`https://backendexample.sanbersy.com/api/data-movie`)
         let dataMovie = daftarMovie.data
@@ -30,7 +35,7 @@ export const MovieProvider = props => {
                 image_url: e.image_url,
                 duration: e.duration,
                 year: e.year,
-                review: e.review
+                review: e.review,
             }
             })
             setMovieList(outputMovie)
@@ -40,15 +45,27 @@ export const MovieProvider = props => {
         axios.get(`https://backendexample.sanbersy.com/api/data-movie/${idMovie}`)
         .then (res => {
             let data = res.data
-            setInputMovie(data.name)
+            setInputMovie(
+                {
+                    title : data.title,
+                    description: data.description,
+                    genre: data.genre,
+                    rating: data.rating,
+                    image_url: data.image_url,
+                    duration: data.duration,
+                    year: data.year,
+                    review: data.review,
+                }
+                )
             setMovieId(data.id)
         })
     }    
     const deleteMovie = (idMovie) => {
-        axios.delete(`https://backendexample.sanbersy.com/api/data-movie/${idMovie}`)
+        axios.delete(`https://backendexample.sanbersy.com/api/data-movie/${idMovie}`, {headers: {"Authorization" : "Bearer "+ Cookies.get("token")}} )
             .then (() => {
                 let newMovieList = movieList.filter((m) => {return m.id !== idMovie })
                 setMovieList(newMovieList)
+                setFetchStatus(true)
             })
         
     }    
@@ -63,24 +80,16 @@ export const MovieProvider = props => {
             duration: inputMovie.duration,
             year: inputMovie.year,
             review: inputMovie.review
-        })
+        }, {headers: {"Authorization" : "Bearer "+ Cookies.get("token")}} )
           .then(res => {
-              let data = res.data
-              setMovieList([...movieList, {
-                  id: data.id,
-                  title: data.title, 
-                  description: data.description,
-                  genre: data.genre,
-                  rating: data.rating,
-                  image_url: data.image_url,
-                  duration: data.duration,
-                  year: data.year,
-                  review: data.review
-                }])
-          })
+            setFetchStatus(true)
+            history.push("/movie-list/")
+        }).catch((e) => {
+            alert(e.response.data.message)
+        })
     }
 
-    const updateMovie = (params) => {
+    const updateMovie = () => {
         axios.put(`https://backendexample.sanbersy.com/api/data-movie/${movieId}`, {
             title : inputMovie.title,
             description: inputMovie.description,
@@ -90,39 +99,34 @@ export const MovieProvider = props => {
             duration: inputMovie.duration,
             year: inputMovie.year,
             review: inputMovie.review
+            }, {headers: {"Authorization" : "Bearer "+ Cookies.get("token")}} )
+            .then((e) => {
+                setFetchStatus(true)
+                history.push("/movie-list/")
             })
-          .then(() => {
-              let dataBaruMovie = movieList.find(el=> el.id === movieId)
-              dataBaruMovie.title= inputMovie.title
-              dataBaruMovie.description= inputMovie.description
-              dataBaruMovie.genre= inputMovie.genre
-              dataBaruMovie.rating= inputMovie.rating
-              dataBaruMovie.image_url= inputMovie.image_url
-              dataBaruMovie.duration= inputMovie.duration
-              dataBaruMovie.year= inputMovie.year
-              dataBaruMovie.review= inputMovie.review
-              setMovieList([...movieList])
-          })      
-    }
+        }
     const functions = {
             fetchMovie,
             deleteMovie,
             submitMovie,
             updateMovie,
-            editMovie
+            editMovie,
+           
         }
         
     return (
-        <MovieProvider value={{
+        <MovieContext.Provider value={{
             movieList,
             setMovieList,
             inputMovie,
             setInputMovie,
             movieId,
             setMovieId,
+            fetchStatus, 
+            setFetchStatus,
             functions
         }}>
             {props.children}
-        </MovieProvider>
+        </MovieContext.Provider>
     )
 }

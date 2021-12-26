@@ -1,16 +1,27 @@
 import React, { useEffect, useContext } from "react"
 import {GameContext} from '../FinalContext/GameContext'
+import {useHistory} from 'react-router-dom'
+import '../aset/GameList.css'
 
 const GameList = () => {
-   const {  gameList, functions} = useContext(GameContext)
+    const history = useHistory()
+   const {  gameList,fetchStatus, setFetchStatus, functions} = useContext(GameContext)
    const {fetchGame, deleteGame, editGame} = functions
-    useEffect(() => {
+   useEffect(() => {
+
+    if (fetchStatus) {
         fetchGame()
-    }, [])
+        setFetchStatus(false)
+    }
+
+
+}, [fetchStatus, setFetchStatus])
+
 
     const handleEdit = (e) => {
         const idGame = parseInt (e.target.value)
         editGame(idGame)
+        history.push(`/game-edit/${idGame}`)
     }
 
     const handleDelete = (e) => {
@@ -19,9 +30,9 @@ const GameList = () => {
     }
 
     return (
-        <>
-            <h1>Game List</h1>
-            <table>
+        <div style={{backgroundColor:"#92ade0", height:"100vh"}}>
+            <h1 style={{textAlign:"center", paddingTop:"25px", fontFamily:"Arial, Helvetica, sans-serif"}}>Game List</h1>
+            <table id="customers">
                 <thead>
                     <tr>
                         <th>No</th>
@@ -54,7 +65,7 @@ const GameList = () => {
                     })}
                 </tbody>
             </table>
-        </>
+        </div>
 
     )
 }

@@ -1,17 +1,24 @@
 import React, { useEffect, useContext } from "react"
 import {MovieContext} from '../FinalContext/MovieContext'
+import { useParams } from "react-router"
+import '../aset/Gameform.css'
 
 const MovieForm = () => {
-  const { inputMovie, setInputMovie, movieId, setMovieId, functions} = useContext(MovieContext)
-  const {fetchMovie, submitMovie, updateMovie} = functions
+  let {Id} = useParams()
+  const { inputMovie, setInputMovie,  movieId, setMovieId, functions} = useContext(MovieContext)
+
+  const { submitMovie, updateMovie, editMovie} = functions
 
    useEffect(() => {
-       fetchMovie()
-   }, [])
+        if(Id !== undefined){
+            editMovie(Id)
+        }
+    },[])
+
     const handleChange = (event) =>{
         let typeOfValue = event.target.value
-        let title = event.target.title
-        setInputMovie({...inputMovie, [title]:typeOfValue})
+        let name = event.target.name
+        setInputMovie({...inputMovie, [name]:typeOfValue})
       }
       const handleSubmit = (event) =>{
         event.preventDefault()
@@ -34,32 +41,32 @@ const MovieForm = () => {
         setMovieId(-1)
       }
     return (
-        <div>
-            <h1>Movie Form </h1>
+        <div style={{backgroundColor:"#92ade0", height:"100vh"}}>
+            <h1 style={{textAlign:"center", paddingTop:"25px", fontFamily:"Arial, Helvetica, sans-serif"}}>Movie Form </h1>
             <form method="post" onSubmit={handleSubmit} className="form-nilai">
-            <div>
-                <label>Judul Film</label>
+            <div className="input1" style={{display:"block"}}>
+                <label className="label">Judul Film</label> <br />
                 <input onChange={handleChange} value={inputMovie.title} name="title" type="text" required />
                 <br />
-                <label>Deskripsi</label>
+                <label>Deskripsi</label> <br />
                 <input onChange={handleChange} value={inputMovie.description} name="description" type="text" required />
                 <br />
-                <label>Genre</label>
+                <label>Genre</label> <br />
                 <input onChange={handleChange} value={inputMovie.genre} name="genre" type="text" required />
                 <br />
-                <label>Rating</label>
+                <label>Rating</label> <br />
                 <input onChange={handleChange} value={inputMovie.rating} name="rating" type="number" required />
                 <br />
-                <label>Durasi</label>
+                <label>Durasi</label> <br />
                 <input onChange={handleChange} value={inputMovie.duration} name="duration" type="number" required />
                 <br />
-                <label>Review</label>
+                <label>Review</label> <br />
                 <input onChange={handleChange} value={inputMovie.review} name="review" type="text" required />
                 <br />               
-                <label>URL</label>
+                <label>URL</label> <br/>
                 <input onChange={handleChange} value={inputMovie.image_url} name="image_url" type="text" required />
                 <br />
-                <label>Tahun Rilis</label>
+                <label>Tahun Rilis</label> <br />
                 <input onChange={handleChange} value={inputMovie.year} name="year" type="number" required />
             </div>
             <input type="submit" />

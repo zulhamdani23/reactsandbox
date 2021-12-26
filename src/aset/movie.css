@@ -1,0 +1,20 @@
+.card-container {
+    margin-top: 20px;
+    margin-bottom: 50px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    /* border: 1px solid black; */
+    flex-direction: row;
+    /* justify-content:space-between; */
+    gap:10px;
+    /* padding:10px; */
+}
+
+.card-container .item {
+    width: 300px;
+    /* border: 1px solid rgb(154, 152, 165); */
+    background-color: rgb(224, 222, 243);
+    height: 500px;
+    border-radius: 5px;
+}

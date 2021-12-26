@@ -1,56 +1,25 @@
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react"
-import { useParams } from "react-router";
-import { MobileAppContext } from "../Context/MobileAppContext";
+import { useParams, useLocation } from "react-router";
+import {MovieContext} from '../FinalContext/MovieContext';
 
-function formatRupiah(angka) {
-    if (angka !== null) {
-
-        var number_string = angka.toString(),
-            split = number_string.split(','),
-            sisa = split[0].length % 3,
-            rupiah = split[0].substr(0, sisa),
-            ribuan = split[0].substr(sisa).match(/\d{3}/gi),
-            separator;
-
-        // tambahkan titik jika yang di input sudah menjadi angka ribuan
-        if (ribuan) {
-            separator = sisa ? '.' : '';
-            rupiah += separator + ribuan.join('.');
-        }
-
-        rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
-        return rupiah === '0' ? 'Free' : 'Rp. ' + rupiah + ",-";
-    } else {
-        return 'Free';
-
-    }
-}
-
-function megaBytesToSize(megaBytes, decimals = 2) {
-    if (megaBytes === 0) return '0 megaBytes';
-
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    const i = Math.floor(Math.log(megaBytes) / Math.log(k));
-
-    return parseFloat((megaBytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
-
-const SearchSection = () => {
+const Search = () => {
     let {valueOfSearch} = useParams()
-    const { data, setData, fetchStatus, setFetchStatus, currentId, setCurrentId, input, setInput, functions, searchStatus, setSearchStatus } = useContext(MobileAppContext)
-    const { fetchData } = functions
+    const pathName = useLocation().pathname
+    const { searchStatus, setSearchStatus } = useContext(MobileAppContext)
     const [ searchData , setSearchData ] = useState([])
 
     useEffect(() => {
 
         const fetchSearch = async() => {
-            let result = await axios.get(`http://backendexample.sanbercloud.com/api/mobile-apps`)
+            let url = ""
+            if (pathName === '/movie-list') {
+                url = `https://backendexample.sanbersy.com/api/data-movie`
+            } else {
+                url = `https://backendexample.sanbersy.com/api/data-game`
+            }
+            let result = await axios.get(url)
             let resultData = result.data
-
             let filterData = resultData.filter((e) => {
                 return Object.values(e).join(" ").toLowerCase().includes( valueOfSearch.toLowerCase() )
             })
@@ -103,4 +72,4 @@ const SearchSection = () => {
     )
 }
 
-export default SearchSection
+export default Search

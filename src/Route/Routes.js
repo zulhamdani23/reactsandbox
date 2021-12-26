@@ -3,20 +3,39 @@ import LayoutComponent from "../Layout/Layout"
 import {
   BrowserRouter as Router,
   Switch,
-  Route
+  Route,
+  Redirect
 } from "react-router-dom"
-import Home from "../Pages/Home"
-import About from "../Pages/About"
-import { MobileAppProvider } from "../Context/MobileAppContext"
-import MobileList from "../Pages/MobileList"
-import MobileForm from "../Pages/MobileForm"
-import SearchSection from "../Pages/SearchSection"
+import Home from "../Component/Home"
+import About from "../Component/About"
+import { MovieProvider } from "../FinalContext/MovieContext"
+import { GameProvider } from "../FinalContext/GameContext"
+import MovieList from "../Component/MovieList"
+import MovieForm from "../Component/MovieForm"
+import Movie from '../Component/Movie'
+import Game from '../Component/Game'
+import GameList from '../Component/GameList'
+import GameForm from '../Component/GameForm'
+import Login from "../Auth/Login"
+import Register from "../Auth/Register"
+import Cookies from "js-cookie"
+import Dashboard from '../Component/Dashboard'
+// import SearchSection from "../Component/SearchSection"
 
 const Routes = () => {
+  const LoginRoute = ({...props}) => {
+    if(Cookies.get('token') !== undefined) {
+      return <Redirect  to='/'/>
+    } else {
+      return  <Route {...props} />
+    }
+  }
   return (
     <>
+   
       <Router>
-        <MobileAppProvider>
+      <MovieProvider>
+    <GameProvider>
           <Switch>
 
             <Route path="/" exact>
@@ -27,25 +46,54 @@ const Routes = () => {
               <LayoutComponent content={<About />} />
             </Route>
 
-            <Route path="/mobile-list" exact>
-              <LayoutComponent content={<MobileList />} />
+            <Route path="/movie" exact>
+              <LayoutComponent content={<Movie />} />
             </Route>
 
-            <Route path="/mobile-form" exact>
-              <LayoutComponent content={<MobileForm/>}/>
+            <Route path="/game" exact>
+              <LayoutComponent content={<Game/>}/>
             </Route>
 
-            <Route path="/mobile-form/edit/:Id" exact>
-              <LayoutComponent content={<MobileForm/>}/>
+            <Route path="/movie-edit/:id" exact>
+              <LayoutComponent content={<MovieForm/>}/>
+            </Route>
+            
+            <Route path="/game-edit/:id" exact>
+              <LayoutComponent content={<GameForm/>}/>
             </Route>
 
-            <Route path="/search/:valueOfSearch" exact>
-              <LayoutComponent content={<SearchSection />}/>
+            <Route path="/movie-add/" exact>
+              <LayoutComponent content={<MovieForm/>}/>
             </Route>
+            
+            <Route path="/game-add/" exact>
+              <LayoutComponent content={<GameForm/>}/>
+            </Route>
+
+            <Route path="/movie-list/" exact>
+              <LayoutComponent content={<MovieList/>}/>
+            </Route>
+
+            <Route path="/game-list/" exact>
+              <LayoutComponent content={<GameList/>}/>
+            </Route>
+
+            <Route path="/dashboard/" exact>
+              <LayoutComponent content={<Dashboard/>}/>
+            </Route>
+
+            <LoginRoute path="/login" exact>
+              <LayoutComponent content={<Login />}/>
+            </LoginRoute>
+            <LoginRoute path="/register" exact>
+              <LayoutComponent content={<Register />}/>
+            </LoginRoute>
 
           </Switch>
-        </MobileAppProvider>
+          </GameProvider>
+      </MovieProvider>
       </Router>
+      
     </>
   )
 

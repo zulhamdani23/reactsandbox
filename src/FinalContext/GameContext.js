@@ -1,10 +1,15 @@
 import axios from 'axios'
 import React, { createContext, useState } from 'react'
+import { useHistory } from "react-router"
+import Cookies from 'js-cookie'
 
 export const GameContext = createContext()
 
 export const GameProvider = props => {
+    let history = useHistory()
+    const [fetchStatus, setFetchStatus] = useState(true)
     const [gameList, setGameList] = useState([])
+    const [gameId, setGameId] = useState(-1)
     const [inputGame, setInputGame] = useState({
         genre:'',
         image_url:'',
@@ -14,7 +19,7 @@ export const GameProvider = props => {
         platform:'',
         release:''
     })
-    const [gameId, setGameId] = useState(-1)
+    
 
     const fetchGame = async () => {
         let daftarGame = await axios.get(`https://backendexample.sanbersy.com/api/data-game`)
@@ -38,15 +43,24 @@ export const GameProvider = props => {
         axios.get(`https://backendexample.sanbersy.com/api/data-game/${idGame}`)
         .then (res => {
             let data = res.data
-            setInputGame(data.name)
+            setInputGame({
+                genre : data.genre,
+                image_url: data.image_url,
+                singlePlayer: data.singlePlayer,
+                multiplayer: data.multiplayer,
+                name: data.name,
+                platform: data.platform,
+                release: data.release 
+            })
             setGameId(data.id)
         })
     }    
     const deleteGame = (idGame) => {
-        axios.delete(`https://backendexample.sanbersy.com/api/data-game/${idGame}`)
+        axios.delete(`https://backendexample.sanbersy.com/api/data-game/${idGame}`,  {headers: {"Authorization" : "Bearer "+ Cookies.get("token")}})
             .then (() => {
                 let newGameList = gameList.filter((m) => {return m.id !== idGame })
                 setGameList(newGameList)
+                setFetchStatus(true)
             })
         
     }    
@@ -61,20 +75,13 @@ export const GameProvider = props => {
             name: inputGame.name,
             platform: inputGame.platform,
             release: inputGame.release
-        })
+        }, {headers: {"Authorization" : "Bearer "+ Cookies.get("token")}} )
           .then(res => {
-              let data = res.data
-              setMovieList([...gameList, {
-                  id: data.id,
-                  genre: data.genre,
-                  image_url: data.image_url, 
-                  singlePlayer: data.singlePlayer,
-                  multiplayer: data.multiplayer,
-                  name: data.name,
-                  platform: data.platform,
-                  release: data.release
-                }])
-          })
+            setFetchStatus(true)
+            history.push('/game-list')
+        }).catch((e) => {
+            alert(e.response.data.message)
+        })
     }
 
     const updateGame = (params) => {
@@ -87,19 +94,12 @@ export const GameProvider = props => {
             name: inputGame.name,
             platform: inputGame.platform,
             release: inputGame.release
-            })
+            }, {headers: {"Authorization" : "Bearer "+ Cookies.get("token")}} )
           .then(() => {
-              let dataBaruGame = movieList.find(el=> el.id === gameId)
-              dataBaruGame.genre= inputGame.genre
-              dataBaruGame.singlePlayer= inputGame.singlePlayer
-              dataBaruGame.genre= inputGame.genre
-              dataBaruGame.multiplayer= inputGame.multiplayer
-              dataBaruGame.image_url= inputGame.image_url
-              dataBaruGame.name= inputGame.name
-              dataBaruGame.platform= inputGame.platform
-              dataBaruGame.release= inputGame.release
-              setMovieList([...gameList])
-          })      
+            setFetchStatus(true)
+            history.push('/game-list')
+        })  
+     
     }
     const functions = {
             fetchGame,
@@ -110,16 +110,18 @@ export const GameProvider = props => {
         }
         
     return (
-        <GameProvider value={{
+        <GameContext.Provider value={{
             gameList,
             setGameList,
             inputGame,
             setInputGame,
             gameId,
             setGameId,
+            fetchStatus, 
+            setFetchStatus,
             functions
         }}>
             {props.children}
-        </GameProvider>
+        </GameContext.Provider>
     )
 }
